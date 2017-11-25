@@ -49,30 +49,35 @@ config_kernel() {
 		| sed 's|CONFIG_LOGO=y|# CONFIG_LOGO is not set|' \
 		> .config
 
-	echo 'CONFIG_ASUS_LAPTOP=m' >> .config
-	echo 'CONFIG_ASUS_NB_WMI=m' >> .config
-	echo 'CONFIG_ASUS_WIRELESS=m' >> .config
-	echo 'CONFIG_ASUS_WMI=m' >> .config
-	echo 'CONFIG_ATH9K=m' >> .config
-	echo 'CONFIG_INPUT_JOYDEV=m' >> .config
-	echo 'CONFIG_INT340X_THERMAL=m' >> .config
-	echo 'CONFIG_INT3406_THERMAL=m' >> .config
-	echo 'CONFIG_INTEL_RAPL=m' >> .config
-	echo 'CONFIG_ITCO_WDT=m' >> .config
-	echo 'CONFIG_MOUSE_ELAN_I2C=m' >> .config
-	echo 'CONFIG_SND_HDA_CODEC_HDMI=m' >> .config
-	echo 'CONFIG_SND_HDA_CODEC_REALTEK=m' >> .config
-	echo 'CONFIG_SND_HDA_GENERIC=m' >> .config
-	echo 'CONFIG_SND_SOC=m' >> .config
-	echo 'CONFIG_SND_SOC_INTEL_SST=m' >> .config
-	echo 'CONFIG_SND_SOC_INTEL_SST_ACPI=m' >> .config
-	echo 'CONFIG_SND_SOC_INTEL_SST_MATCH=m' >> .config
-	echo 'CONFIG_SND_SST_ATOM_HIFI2_PLATFORM=m' >> .config
-	echo 'CONFIG_USB_XHCI_HCD=m' >> .config
-
+	echo 'CONFIG_ACPI_WMI=y' >> .config
+	echo 'CONFIG_ASUS_LAPTOP=y' >> .config
+	echo 'CONFIG_ASUS_NB_WMI=y' >> .config
+	echo 'CONFIG_ASUS_WIRELESS=y' >> .config
+	echo 'CONFIG_ASUS_WMI=y' >> .config
+	echo 'CONFIG_ATH9K=y' >> .config
+	echo 'CONFIG_I2C_DESIGNWARE_CORE=y' >> .config
+	echo 'CONFIG_I2C_DESIGNWARE_PLATFORM=y' >> .config
+	echo 'CONFIG_I2C_HID=y' >> .config
+	echo 'CONFIG_INPUT_MOUSEDEV=y' >> .config
+	echo 'CONFIG_INT340X_THERMAL=y' >> .config
+	echo 'CONFIG_INT3406_THERMAL=y' >> .config
+	echo 'CONFIG_INTEL_RAPL=y' >> .config
+	echo 'CONFIG_ITCO_WDT=y' >> .config
 	echo 'CONFIG_ITCO_VENDOR_SUPPORT=y' >> .config
+	echo 'CONFIG_MOUSE_ELAN_I2C=y' >> .config
+	echo 'CONFIG_MOUSE_ELAN_I2C_I2C=y' >> .config
+	echo 'CONFIG_MOUSE_ELAN_I2C_SMBUS=y' >> .config
+	echo 'CONFIG_SND_HDA_CODEC_HDMI=y' >> .config
+	echo 'CONFIG_SND_HDA_CODEC_REALTEK=y' >> .config
+	echo 'CONFIG_SND_HDA_GENERIC=y' >> .config
 	echo 'CONFIG_SND_HDA_PREALLOC_SIZE=2048' >> .config
+	echo 'CONFIG_SND_SOC=y' >> .config
 	echo 'CONFIG_SND_SOC_COMPRESS=y' >> .config
+	echo 'CONFIG_SND_SOC_INTEL_SST=y' >> .config
+	echo 'CONFIG_SND_SOC_INTEL_SST_ACPI=y' >> .config
+	echo 'CONFIG_SND_SOC_INTEL_SST_MATCH=y' >> .config
+	echo 'CONFIG_SND_SST_ATOM_HIFI2_PLATFORM=y' >> .config
+	echo 'CONFIG_USB_XHCI_HCD=y' >> .config
 
 	make olddefconfig
 }
