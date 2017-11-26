@@ -1,10 +1,33 @@
-#!/bin/sh
+#!/bin/bash
 
 REVISION="0.2"
 HARDWARE="ASUS.R540S"
 
 LINUX_VERSION="4.13"
 TARGET="linux-source-$LINUX_VERSION"
+
+show_usage() {
+	echo "Usage: $(basename $0) [--clean]"
+	exit
+}
+
+check_arguments() {
+	case $# in
+		0)
+			return
+			;;
+		1)
+			if [ $1 = "--clean" ]
+			then
+				CLEAN=true
+				return
+			fi
+			;;
+		*)
+			;;
+	esac
+	show_usage
+}
 
 is_installed() {
 	which $@ >/dev/null
@@ -35,8 +58,11 @@ check_kernel() {
 
 clean_kernel() {
 	cd $TARGET
-	make-kpkg clean
-	make distclean
+	if [ $CLEAN ]
+	then
+		make-kpkg clean
+		make distclean
+	fi
 }
 
 config_kernel() {
@@ -67,6 +93,8 @@ config_kernel() {
 	echo 'CONFIG_MOUSE_ELAN_I2C=y' >> .config
 	echo 'CONFIG_MOUSE_ELAN_I2C_I2C=y' >> .config
 	echo 'CONFIG_MOUSE_ELAN_I2C_SMBUS=y' >> .config
+	echo 'CONFIG_MOUSE_PS2_ELANTECH=y' >> .config
+	echo 'CONFIG_MOUSE_SYNAPTICS_I2C=y' >> .config
 	echo 'CONFIG_SND_HDA_CODEC_HDMI=y' >> .config
 	echo 'CONFIG_SND_HDA_CODEC_REALTEK=y' >> .config
 	echo 'CONFIG_SND_HDA_GENERIC=y' >> .config
@@ -81,6 +109,7 @@ config_kernel() {
 
 	# extra
 	echo 'CONFIG_GENERIC_IRQ_CHIP=y' >> .config
+	echo 'CONFIG_INPUT_MOUSEDEV_PSAUX=y' >> .config
 	echo 'CONFIG_KERNEL_XZ=y' >> .config
 	echo 'CONFIG_SQUASHFS=m' >> .config
 
@@ -95,10 +124,16 @@ make_kernel() {
 		--rootcmd=fakeroot \
 		kernel_headers \
 		kernel_image
+
+	echo -e '\nDone!\n'
+	ls -lh ../linux-*.deb
 }
 
-check_dependencies
-check_kernel
-clean_kernel
-config_kernel
-make_kernel
+time (
+	check_arguments $@
+	check_dependencies
+	check_kernel
+	clean_kernel
+	config_kernel
+	make_kernel
+)
