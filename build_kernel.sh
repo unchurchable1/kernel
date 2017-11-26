@@ -1,40 +1,35 @@
 #!/bin/sh
 
-REVISION="0.1"
-VERSION="4.13"
-TARGET="linux-source-$VERSION"
+REVISION="0.2"
+HARDWARE="ASUS.R540S"
 
-show_usage() {
-	echo "Usage: sudo $(basename $0)"
-	exit
-}
-
-root_or_gtfo() {
-	[ $(id -u) = 0 ] || show_usage
-}
+LINUX_VERSION="4.13"
+TARGET="linux-source-$LINUX_VERSION"
 
 is_installed() {
 	which $@ >/dev/null
 	return $?
 }
 
-install_quietly() {
-	apt install -qq --assume-yes $@
+apt_install() {
+	echo "Missing dependency: $@"
+	sudo apt install -qq --assume-yes $@
 }
 
 check_dependencies() {
-	is_installed make-kpkg || install_quietly kernel-package
+	is_installed fakeroot || apt_install fakeroot
+	is_installed make-kpkg || apt_install kernel-package
 }
 
 check_kernel() {
-	cd /usr/src
+	cd $(dirname $0)
 	if [ ! -d $TARGET ]
 	then
-		if [ ! -e $TARGET.tar.xz ]
+		if [ ! -e /usr/src/$TARGET.tar.xz ]
 		then
-			install_quietly $TARGET
+			apt_install $TARGET
 		fi
-		tar -xf $TARGET.tar.xz
+		tar -xf /usr/src/$TARGET.tar.xz
 	fi
 }
 
@@ -45,10 +40,14 @@ clean_kernel() {
 }
 
 config_kernel() {
+	# start with default config
 	cat arch/x86/configs/x86_64_defconfig \
 		| sed 's|CONFIG_LOGO=y|# CONFIG_LOGO is not set|' \
+		| sed 's|CONFIG_NO_HZ=y|# CONFIG_NO_HZ is not set|' \
+		| sed 's|CONFIG_HZ_1000=y|CONFIG_HZ_250=y|' \
 		> .config
 
+	# ASUS R540S hardware
 	echo 'CONFIG_ACPI_WMI=y' >> .config
 	echo 'CONFIG_ASUS_LAPTOP=y' >> .config
 	echo 'CONFIG_ASUS_NB_WMI=y' >> .config
@@ -59,6 +58,7 @@ config_kernel() {
 	echo 'CONFIG_I2C_DESIGNWARE_PLATFORM=y' >> .config
 	echo 'CONFIG_I2C_HID=y' >> .config
 	echo 'CONFIG_INPUT_MOUSEDEV=y' >> .config
+	echo 'CONFIG_INPUT_PCSPKR=y' >> .config
 	echo 'CONFIG_INT340X_THERMAL=y' >> .config
 	echo 'CONFIG_INT3406_THERMAL=y' >> .config
 	echo 'CONFIG_INTEL_RAPL=y' >> .config
@@ -79,17 +79,24 @@ config_kernel() {
 	echo 'CONFIG_SND_SST_ATOM_HIFI2_PLATFORM=y' >> .config
 	echo 'CONFIG_USB_XHCI_HCD=y' >> .config
 
+	# extra
+	echo 'CONFIG_GENERIC_IRQ_CHIP=y' >> .config
+	echo 'CONFIG_KERNEL_XZ=y' >> .config
+	echo 'CONFIG_SQUASHFS=m' >> .config
+
 	make olddefconfig
 }
 
 make_kernel() {
 	make-kpkg --initrd \
+		--append-to-version=-custom \
 		--jobs=$(cat /proc/cpuinfo | grep ^processor | wc -l) \
-		--revision=$REVISION.$SUDO_USER \
+		--revision=$REVISION.$HARDWARE \
+		--rootcmd=fakeroot \
+		kernel_headers \
 		kernel_image
 }
 
-root_or_gtfo
 check_dependencies
 check_kernel
 clean_kernel
