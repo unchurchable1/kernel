@@ -73,7 +73,6 @@ config_kernel() {
 		| sed 's|CONFIG_ACPI_BUTTON=n|CONFIG_ACPI_BUTTON=m|' \
 		| sed 's|CONFIG_ACPI_FAN=n|CONFIG_ACPI_FAN=m|' \
 		| sed 's|CONFIG_ACPI_THERMAL=n|CONFIG_ACPI_THERMAL=m|' \
-		| sed 's|CONFIG_ACPI_THERMAL=n|CONFIG_ACPI_THERMAL=m|' \
 		| sed 's|CONFIG_ACPI_VIDEO=n|CONFIG_ACPI_VIDEO=m|' \
 		| sed 's|CONFIG_ACPI_WMI=n|CONFIG_ACPI_WMI=m|' \
 		| sed 's|CONFIG_ASUS_NB_WMI=n|CONFIG_ASUS_NB_WMI=m|' \
@@ -88,12 +87,6 @@ config_kernel() {
 		| sed 's|CONFIG_BLK_DEV_DM=n|CONFIG_BLK_DEV_DM=m|' \
 		| sed 's|CONFIG_BLK_DEV_SD=n|CONFIG_BLK_DEV_SD=m|' \
 		| sed 's|CONFIG_BLK_DEV_SR=n|CONFIG_BLK_DEV_SR=m|' \
-		| sed 's|CONFIG_BT_ATH3K=n|CONFIG_BT_ATH3K=m|' \
-		| sed 's|CONFIG_BT_BCM=n|CONFIG_BT_BCM=m|' \
-		| sed 's|CONFIG_BT_HCIBTUSB=n|CONFIG_BT_HCIBTUSB=m|' \
-		| sed 's|CONFIG_BT_INTEL=n|CONFIG_BT_INTEL=m|' \
-		| sed 's|CONFIG_BT=n|CONFIG_BT=m|' \
-		| sed 's|CONFIG_BT_RTL=n|CONFIG_BT_RTL=m|' \
 		| sed 's|CONFIG_CDROM_PKTCDVD=n|CONFIG_CDROM_PKTCDVD=m|' \
 		| sed 's|CONFIG_CFG80211=n|CONFIG_CFG80211=m|' \
 		| sed 's|CONFIG_CHR_DEV_SG=n|CONFIG_CHR_DEV_SG=m|' \
@@ -112,7 +105,6 @@ config_kernel() {
 		| sed 's|CONFIG_CRYPTO_CTR=n|CONFIG_CRYPTO_CTR=m|' \
 		| sed 's|CONFIG_CRYPTO_DRBG=n|CONFIG_CRYPTO_DRBG=m|' \
 		| sed 's|CONFIG_CRYPTO_ECB=n|CONFIG_CRYPTO_ECB=m|' \
-		| sed 's|CONFIG_CRYPTO_ECDH=n|CONFIG_CRYPTO_ECDH=m|' \
 		| sed 's|CONFIG_CRYPTO_GHASH_CLMUL_NI_INTEL=n|CONFIG_CRYPTO_GHASH_CLMUL_NI_INTEL=m|' \
 		| sed 's|CONFIG_CRYPTO_GLUE_HELPER_X86=n|CONFIG_CRYPTO_GLUE_HELPER_X86=m|' \
 		| sed 's|CONFIG_CRYPTO_SIMD=n|CONFIG_CRYPTO_SIMD=m|' \
@@ -211,7 +203,6 @@ config_kernel() {
 		| sed 's|CONFIG_TCG_TPM=n|CONFIG_TCG_TPM=m|' \
 		| sed 's|CONFIG_TUN=n|CONFIG_TUN=m|' \
 		| sed 's|CONFIG_USB_COMMON=n|CONFIG_USB_COMMON=m|' \
-		| sed 's|CONFIG_USB_F_UVC=n|CONFIG_USB_F_UVC=m|' \
 		| sed 's|CONFIG_USB_HID=n|CONFIG_USB_HID=m|' \
 		| sed 's|CONFIG_USB=n|CONFIG_USB=m|' \
 		| sed 's|CONFIG_USB_STORAGE=n|CONFIG_USB_STORAGE=m|' \
@@ -219,11 +210,6 @@ config_kernel() {
 		| sed 's|CONFIG_USB_XHCI_HCD=n|CONFIG_USB_XHCI_HCD=m|' \
 		| sed 's|CONFIG_USB_XHCI_PCI=n|CONFIG_USB_XHCI_PCI=m|' \
 		| sed 's|CONFIG_VFAT_FS=n|CONFIG_VFAT_FS=m|' \
-		| sed 's|CONFIG_VIDEOBUF2_CORE=n|CONFIG_VIDEOBUF2_CORE=m|' \
-		| sed 's|CONFIG_VIDEOBUF2_MEMOPS=n|CONFIG_VIDEOBUF2_MEMOPS=m|' \
-		| sed 's|CONFIG_VIDEOBUF2_VMALLOC=n|CONFIG_VIDEOBUF2_VMALLOC=m|' \
-		| sed 's|CONFIG_VIDEO_DEV=n|CONFIG_VIDEO_DEV=m|' \
-		| sed 's|CONFIG_VIDEO_V4L2=n|CONFIG_VIDEO_V4L2=m|' \
 		| sed 's|CONFIG_X86_PKG_TEMP_THERMAL=n|CONFIG_X86_PKG_TEMP_THERMAL=m|' \
 		> .config
 	make olddefconfig
@@ -250,3 +236,12 @@ time (
 	config_kernel
 	make_kernel
 )
+
+# bluetooth
+#		| sed 's|CONFIG_BT_ATH3K=n|CONFIG_BT_ATH3K=m|' \
+#		| sed 's|CONFIG_BT_BCM=n|CONFIG_BT_BCM=m|' \
+#		| sed 's|CONFIG_BT_HCIBTUSB=n|CONFIG_BT_HCIBTUSB=m|' \
+#		| sed 's|CONFIG_BT_INTEL=n|CONFIG_BT_INTEL=m|' \
+#		| sed 's|CONFIG_BT=n|CONFIG_BT=m|' \
+#		| sed 's|CONFIG_BT_RTL=n|CONFIG_BT_RTL=m|' \
+#		| sed 's|CONFIG_CRYPTO_ECDH=n|CONFIG_CRYPTO_ECDH=m|' \
