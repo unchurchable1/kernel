@@ -1,9 +1,9 @@
 #!/bin/bash
 
-REVISION="0.3"
+REVISION="0.4"
 HARDWARE="ASUS.R540S"
 
-LINUX_VERSION="4.13"
+LINUX_VERSION="4.14"
 TARGET="linux-source-$LINUX_VERSION"
 
 show_usage() {
