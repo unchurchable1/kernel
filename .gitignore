@@ -1,3 +1,1 @@
-*.deb
-
-linux-source-*/
+linux-*
