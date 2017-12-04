@@ -44,6 +44,21 @@ check_dependencies() {
 	is_installed make-kpkg || apt_install kernel-package
 }
 
+config_mkkpkg() {
+	CONF=/etc/kernel-pkg.conf
+	NAME=$(git config --get user.name)
+	MAIL=$(git config --get user.email)
+
+	if [ -n "$NAME" ] && [ -n "$MAIL" ]
+	then
+		grep -q "$NAME" $CONF || \
+			sudo sed -i "s|maintainer := .*$|maintainer := $NAME|" $CONF
+
+		grep -q "$MAIL" $CONF || \
+			sudo sed -i "s|email := .*$|email := $MAIL|" $CONF
+	fi
+}
+
 check_kernel() {
 	cd $(dirname $0)
 	if [ ! -d $TARGET ]
@@ -243,6 +258,7 @@ make_kernel() {
 time (
 	check_arguments $@
 	check_dependencies
+	config_mkkpkg
 	check_kernel
 	clean_kernel
 	config_kernel
