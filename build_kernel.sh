@@ -104,6 +104,12 @@ config_kernel() {
 		| sed 's|CONFIG_BLK_DEV_LOOP=n|CONFIG_BLK_DEV_LOOP=m|' \
 		| sed 's|CONFIG_BLK_DEV_SD=n|CONFIG_BLK_DEV_SD=m|' \
 		| sed 's|CONFIG_BLK_DEV_SR=n|CONFIG_BLK_DEV_SR=m|' \
+		| sed 's|CONFIG_BT_ATH3K=n|CONFIG_BT_ATH3K=m|' \
+		| sed 's|CONFIG_BT_BCM=n|CONFIG_BT_BCM=m|' \
+		| sed 's|CONFIG_BT_HCIBTUSB=n|CONFIG_BT_HCIBTUSB=m|' \
+		| sed 's|CONFIG_BT_INTEL=n|CONFIG_BT_INTEL=m|' \
+		| sed 's|CONFIG_BT=n|CONFIG_BT=m|' \
+		| sed 's|CONFIG_BT_RTL=n|CONFIG_BT_RTL=m|' \
 		| sed 's|CONFIG_CFG80211=n|CONFIG_CFG80211=m|' \
 		| sed 's|CONFIG_CHR_DEV_SG=n|CONFIG_CHR_DEV_SG=m|' \
 		| sed 's|CONFIG_CRC16=n|CONFIG_CRC16=m|' \
@@ -121,6 +127,7 @@ config_kernel() {
 		| sed 's|CONFIG_CRYPTO_CTR=n|CONFIG_CRYPTO_CTR=m|' \
 		| sed 's|CONFIG_CRYPTO_DRBG=n|CONFIG_CRYPTO_DRBG=m|' \
 		| sed 's|CONFIG_CRYPTO_ECB=n|CONFIG_CRYPTO_ECB=m|' \
+		| sed 's|CONFIG_CRYPTO_ECDH=n|CONFIG_CRYPTO_ECDH=m|' \
 		| sed 's|CONFIG_CRYPTO_GHASH_CLMUL_NI_INTEL=n|CONFIG_CRYPTO_GHASH_CLMUL_NI_INTEL=m|' \
 		| sed 's|CONFIG_CRYPTO_GLUE_HELPER_X86=n|CONFIG_CRYPTO_GLUE_HELPER_X86=m|' \
 		| sed 's|CONFIG_CRYPTO_SIMD=n|CONFIG_CRYPTO_SIMD=m|' \
@@ -264,12 +271,3 @@ time (
 	config_kernel
 	make_kernel
 )
-
-# bluetooth
-#		| sed 's|CONFIG_BT_ATH3K=n|CONFIG_BT_ATH3K=m|' \
-#		| sed 's|CONFIG_BT_BCM=n|CONFIG_BT_BCM=m|' \
-#		| sed 's|CONFIG_BT_HCIBTUSB=n|CONFIG_BT_HCIBTUSB=m|' \
-#		| sed 's|CONFIG_BT_INTEL=n|CONFIG_BT_INTEL=m|' \
-#		| sed 's|CONFIG_BT=n|CONFIG_BT=m|' \
-#		| sed 's|CONFIG_BT_RTL=n|CONFIG_BT_RTL=m|' \
-#		| sed 's|CONFIG_CRYPTO_ECDH=n|CONFIG_CRYPTO_ECDH=m|' \
