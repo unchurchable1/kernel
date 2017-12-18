@@ -1,10 +1,11 @@
 #!/bin/bash
 
-REVISION="0.5"
+REVISION="0.6"
 HARDWARE="ASUS.R540S"
 
-LINUX_VERSION="4.14"
-TARGET="linux-source-$LINUX_VERSION"
+LINUX_VERSION="4.14.7"
+TARGET="linux-$LINUX_VERSION"
+TARGET_URL="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 
 show_usage() {
 	echo "Usage: $(basename $0) [--clean]"
@@ -63,11 +64,12 @@ check_kernel() {
 	cd $(dirname $0)
 	if [ ! -d $TARGET ]
 	then
-		if [ ! -e /usr/src/$TARGET.tar.xz ]
+		if [ ! -e .src/$TARGET.tar.xz ]
 		then
-			apt_install $TARGET
+			mkdir -p .src
+			wget $TARGET_URL/$TARGET.tar.xz -O .src/$TARGET.tar.xz
 		fi
-		tar -xf /usr/src/$TARGET.tar.xz
+		tar -xf .src/$TARGET.tar.xz
 	fi
 }
 
