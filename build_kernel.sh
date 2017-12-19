@@ -1,11 +1,13 @@
 #!/bin/bash
 
-REVISION="0.6"
+REVISION="0.7"
 HARDWARE="ASUS.R540S"
 
 LINUX_VERSION="4.14.7"
 TARGET="linux-$LINUX_VERSION"
 TARGET_URL="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
+PATCH_DIR="debian_patches"
+PATCH_URL="https://anonscm.debian.org/cgit/kernel/linux.git/plain/debian/patches/"
 
 show_usage() {
 	echo "Usage: $(basename $0) [--clean]"
@@ -67,7 +69,7 @@ check_kernel() {
 		if [ ! -e .src/$TARGET.tar.xz ]
 		then
 			mkdir -p .src
-			wget $TARGET_URL/$TARGET.tar.xz -O .src/$TARGET.tar.xz
+			wget -q $TARGET_URL/$TARGET.tar.xz -O .src/$TARGET.tar.xz
 		fi
 		tar -xf .src/$TARGET.tar.xz
 	fi
@@ -83,20 +85,21 @@ clean_kernel() {
 }
 
 patch_kernel() {
-	if [ -e .patched ]
-	then
-		return
-	else
-		for PATCH in $(cat ../patches.list)
-		do
-			wget $PATCH
-		done
-		for FILE in *.patch
-		do
-			patch -p1 < $FILE
-		done
-		touch .patched
-	fi
+	for PATCH in $(wget -q $PATCH_URL/series -O - | grep -v '#')
+	do
+		if [ ! -e $PATCH_DIR/$PATCH ]
+		then
+			mkdir -p $PATCH_DIR/$(dirname $PATCH)
+			wget -q $PATCH_URL/$PATCH -O $PATCH_DIR/$PATCH
+			git apply --check < $PATCH_DIR/$PATCH 2>/dev/null
+			if [ $? != 0 ]
+			then
+				echo "Skipping patch: $PATCH"
+			else
+				patch -p1 -uNs < $PATCH_DIR/$PATCH
+			fi
+		fi
+	done
 }
 
 config_kernel() {
