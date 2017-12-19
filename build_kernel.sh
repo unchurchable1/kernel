@@ -7,6 +7,9 @@ LINUX_VERSION="4.14.7"
 TARGET="linux-$LINUX_VERSION"
 TARGET_URL="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
 
+PATCHES="bugfix/all/fs-add-module_softdep-declarations-for-hard-coded-cr.patch"
+PATCH_URL="https://anonscm.debian.org/cgit/kernel/linux.git/plain/debian/patches/"
+
 show_usage() {
 	echo "Usage: $(basename $0) [--clean]"
 	exit
@@ -79,6 +82,23 @@ clean_kernel() {
 	then
 		make-kpkg clean
 		make distclean
+	fi
+}
+
+patch_kernel() {
+	if [ -e .patched ]
+	then
+		return
+	else
+		for PATCH in $PATCHES
+		do
+			wget $PATCH_URL/$PATCH
+		done
+		for FILE in *.patch
+		do
+			patch -p1 < $FILE
+		done
+		touch .patched
 	fi
 }
 
@@ -276,6 +296,7 @@ time (
 	config_mkkpkg
 	check_kernel
 	clean_kernel
+	patch_kernel
 	config_kernel
 	make_kernel
 )
