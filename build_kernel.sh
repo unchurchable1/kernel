@@ -108,6 +108,10 @@ config_kernel() {
 	do
 		sed -i "s|$MODULE=n|$MODULE=m|" .config
 	done
+	for OPTION in $(cat ../options.list)
+	do
+		sed -i "s|# $OPTION is not set|$OPTION=y|" .config
+	done
 	make olddefconfig
 }
 
