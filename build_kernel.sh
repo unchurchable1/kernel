@@ -1,8 +1,9 @@
 #!/bin/bash
 
-REVISION="0.7"
+REVISION="0.8"
 HARDWARE="ASUS.R540S"
 
+DEBIAN_BRANCH="sid"
 LINUX_VERSION="4.14.7"
 TARGET="linux-$LINUX_VERSION"
 TARGET_URL="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
@@ -85,12 +86,12 @@ clean_kernel() {
 }
 
 patch_kernel() {
-	for PATCH in $(wget -q $PATCH_URL/series -O - | grep -v '#')
+	for PATCH in $(wget -q $PATCH_URL/series?h=$DEBIAN_BRANCH -O - | grep -v '#')
 	do
 		if [ ! -e $PATCH_DIR/$PATCH ]
 		then
 			mkdir -p $PATCH_DIR/$(dirname $PATCH)
-			wget -q $PATCH_URL/$PATCH -O $PATCH_DIR/$PATCH
+			wget -q $PATCH_URL/$PATCH?h=$DEBIAN_BRANCH -O $PATCH_DIR/$PATCH
 			git apply --check < $PATCH_DIR/$PATCH 2>/dev/null
 			if [ $? != 0 ]
 			then
