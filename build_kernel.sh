@@ -1,17 +1,21 @@
 #!/bin/bash
 
-REVISION="0.8"
+REVISION="0.9"
 HARDWARE="ASUS.R540S"
+VERSION="custom"
 
 DEBIAN_BRANCH="sid"
-LINUX_VERSION="4.14.7"
-TARGET="linux-$LINUX_VERSION"
-TARGET_URL="https://cdn.kernel.org/pub/linux/kernel/v4.x/"
-PATCH_DIR="debian_patches"
-PATCH_URL="https://anonscm.debian.org/cgit/kernel/linux.git/plain/debian/patches/"
+LINUX_VERSION="4.14"
+TARGET="linux-source-$LINUX_VERSION"
+
+SELF=$(basename $0)
+
+log() {
+	echo "* [$SELF] : $@"
+}
 
 show_usage() {
-	echo "Usage: $(basename $0) [--clean]"
+	echo "Usage: $SELF [--clean]"
 	exit
 }
 
@@ -39,7 +43,7 @@ is_installed() {
 }
 
 apt_install() {
-	echo "Missing dependency: $@"
+	log "Missing dependency: $@"
 	sudo apt install -qq --assume-yes $@
 }
 
@@ -55,6 +59,7 @@ config_mkkpkg() {
 
 	if [ -n "$NAME" ] && [ -n "$MAIL" ]
 	then
+		log "Configuring kernel-package"
 		grep -q "$NAME" $CONF || \
 			sudo sed -i "s|maintainer := .*$|maintainer := $NAME|" $CONF
 
@@ -67,12 +72,12 @@ check_kernel() {
 	cd $(dirname $0)
 	if [ ! -d $TARGET ]
 	then
-		if [ ! -e .src/$TARGET.tar.xz ]
+		if [ ! -e /usr/src/$TARGET.tar.xz ]
 		then
-			mkdir -p .src
-			wget -q $TARGET_URL/$TARGET.tar.xz -O .src/$TARGET.tar.xz
+			apt_install $TARGET
 		fi
-		tar -xf .src/$TARGET.tar.xz
+		log "Unpacking $TARGET.tar.xz"
+		tar -xf /usr/src/$TARGET.tar.xz
 	fi
 }
 
@@ -80,30 +85,14 @@ clean_kernel() {
 	cd $TARGET
 	if [ $CLEAN ]
 	then
+		log "Cleaning $TARGET"
 		make-kpkg clean
 		make distclean
 	fi
 }
 
-patch_kernel() {
-	for PATCH in $(wget -q $PATCH_URL/series?h=$DEBIAN_BRANCH -O - | grep -v '#')
-	do
-		if [ ! -e $PATCH_DIR/$PATCH ]
-		then
-			mkdir -p $PATCH_DIR/$(dirname $PATCH)
-			wget -q $PATCH_URL/$PATCH?h=$DEBIAN_BRANCH -O $PATCH_DIR/$PATCH
-			git apply --check < $PATCH_DIR/$PATCH 2>/dev/null
-			if [ $? != 0 ]
-			then
-				echo "Skipping patch: $PATCH"
-			else
-				patch -p1 -uNs < $PATCH_DIR/$PATCH
-			fi
-		fi
-	done
-}
-
 config_kernel() {
+	log "Configuring $TARGET"
 	cat /boot/config-$(uname -r) | sed "s|=m|=n|" > .config
 	for MODULE in $(cat ../modules.list)
 	do
@@ -117,15 +106,17 @@ config_kernel() {
 }
 
 make_kernel() {
-	make-kpkg --initrd \
-		--append-to-version=-custom \
-		--jobs=$(cat /proc/cpuinfo | grep ^processor | wc -l) \
+	log "Compiling $TARGET"
+	make-kpkg \
+		--append-to-version=-$VERSION \
+		--initrd \
+		--jobs=$(grep ^processor /proc/cpuinfo | wc -l) \
 		--revision=$REVISION.$HARDWARE \
 		--rootcmd=fakeroot \
 		kernel_headers \
 		kernel_image
 
-	echo -e '\nDone!\n'
+	log "Done!"
 	ls -lh ../linux-*.deb
 }
 
@@ -135,7 +126,6 @@ time (
 	config_mkkpkg
 	check_kernel
 	clean_kernel
-	patch_kernel
 	config_kernel
 	make_kernel
 )
