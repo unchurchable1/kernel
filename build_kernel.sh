@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REVISION="0.9"
+REVISION="1.0"
 HARDWARE="ASUS.R540S"
 VERSION="custom"
 
@@ -11,30 +11,42 @@ TARGET="linux-source-$LINUX_VERSION"
 SELF=$(basename $0)
 
 log() {
-	echo "* [$SELF] : $@"
+	printf "* [$SELF] : $@\n"
 }
 
 show_usage() {
-	echo "Usage: $SELF [--clean]"
+	printf "Usage: $SELF [OPTION]...\n\n"
+	printf "Options:\n"
+	printf "  -c	  clean kernel source tree; runs 'make-kpkg clean'\n"
+	printf "  -p	  purge kernel source tree; runs 'rm -rf $TARGET'\n"
+	printf "  -h	  display this help and exit\n"
+	exit
+}
+
+wrong_usage() {
+	printf "$SELF: invalid option -- '$@'\n"
+	printf "Try '$SELF -h' for more information.\n"
 	exit
 }
 
 check_arguments() {
-	case $# in
-		0)
-			return
-			;;
-		1)
-			if [ $1 = "--clean" ]
-			then
+	while getopts ":cph" OPT
+	do
+		case $OPT in
+			c)
 				CLEAN=true
-				return
-			fi
-			;;
-		*)
-			;;
-	esac
-	show_usage
+				;;
+			p)
+				PURGE=true
+				;;
+			h)
+				show_usage
+				;;
+			\?)
+				wrong_usage $OPTARG
+				;;
+		esac
+	done
 }
 
 is_installed() {
@@ -70,6 +82,11 @@ config_mkkpkg() {
 
 check_kernel() {
 	cd $(dirname $0)
+	if [ $PURGE ]
+	then
+		log "Purging $TARGET"
+		rm -rf $TARGET
+	fi
 	if [ ! -d $TARGET ]
 	then
 		if [ ! -e /usr/src/$TARGET.tar.xz ]
@@ -87,25 +104,28 @@ clean_kernel() {
 	then
 		log "Cleaning $TARGET"
 		make-kpkg clean
-		make distclean
 	fi
 }
 
 config_kernel() {
 	log "Configuring $TARGET"
+	# start with current config; disable all modules
 	cat /boot/config-$(uname -r) | sed "s|=m|=n|" > .config
+	# re-enable wanted modules
 	for MODULE in $(cat ../modules.list)
 	do
 		sed -i "s|$MODULE=n|$MODULE=m|" .config
 	done
+	# enable additional options
 	for OPTION in $(cat ../options.list)
 	do
 		sed -i "s|# $OPTION is not set|$OPTION=y|" .config
 	done
+	# generate new config
 	make olddefconfig
 }
 
-make_kernel() {
+build_kernel() {
 	log "Compiling $TARGET"
 	make-kpkg \
 		--append-to-version=-$VERSION \
@@ -120,12 +140,15 @@ make_kernel() {
 	ls -lh ../linux-*.deb
 }
 
+# setup
+check_arguments $@
+check_dependencies
+config_mkkpkg
+check_kernel
+
+# compile
 time (
-	check_arguments $@
-	check_dependencies
-	config_mkkpkg
-	check_kernel
 	clean_kernel
 	config_kernel
-	make_kernel
+	build_kernel
 )
