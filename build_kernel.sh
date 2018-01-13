@@ -11,133 +11,133 @@ TARGET="linux-source-$LINUX_VERSION"
 SELF=$(basename $0)
 
 log() {
-	printf "* [$SELF] : $@\n"
+    printf "* [$SELF] : $@\n"
 }
 
 show_usage() {
-	printf "Usage: $SELF [OPTION]...\n\n"
-	printf "Options:\n"
-	printf "  -c	  clean kernel source tree; runs 'make-kpkg clean'\n"
-	printf "  -p	  purge kernel source tree; runs 'rm -rf $TARGET'\n"
-	printf "  -h	  display this help and exit\n"
-	exit
+    printf "Usage: $SELF [OPTION]...\n\n"
+    printf "Options:\n"
+    printf "  -c      clean kernel source tree; runs 'make-kpkg clean'\n"
+    printf "  -p      purge kernel source tree; runs 'rm -rf $TARGET'\n"
+    printf "  -h      display this help and exit\n"
+    exit
 }
 
 wrong_usage() {
-	printf "$SELF: invalid option -- '$@'\n"
-	printf "Try '$SELF -h' for more information.\n"
-	exit
+    printf "$SELF: invalid option -- '$@'\n"
+    printf "Try '$SELF -h' for more information.\n"
+    exit
 }
 
 check_arguments() {
-	while getopts ":cph" OPT
-	do
-		case $OPT in
-			c)
-				CLEAN=true
-				;;
-			p)
-				PURGE=true
-				;;
-			h)
-				show_usage
-				;;
-			\?)
-				wrong_usage $OPTARG
-				;;
-		esac
-	done
+    while getopts ":cph" OPT
+    do
+        case $OPT in
+            c)
+                CLEAN=true
+                ;;
+            p)
+                PURGE=true
+                ;;
+            h)
+                show_usage
+                ;;
+            \?)
+                wrong_usage $OPTARG
+                ;;
+        esac
+    done
 }
 
 is_installed() {
-	which $@ >/dev/null
-	return $?
+    which $@ >/dev/null
+    return $?
 }
 
 apt_install() {
-	log "Missing dependency: $@"
-	sudo apt install -qq --assume-yes $@
+    log "Missing dependency: $@"
+    sudo apt install -qq --assume-yes $@
 }
 
 check_dependencies() {
-	is_installed fakeroot || apt_install fakeroot
-	is_installed make-kpkg || apt_install kernel-package
+    is_installed fakeroot || apt_install fakeroot
+    is_installed make-kpkg || apt_install kernel-package
 }
 
 config_mkkpkg() {
-	CONF=/etc/kernel-pkg.conf
-	NAME=$(git config --get user.name)
-	MAIL=$(git config --get user.email)
+    CONF=/etc/kernel-pkg.conf
+    NAME=$(git config --get user.name)
+    MAIL=$(git config --get user.email)
 
-	if [ -n "$NAME" ] && [ -n "$MAIL" ]
-	then
-		log "Configuring kernel-package"
-		grep -q "$NAME" $CONF || \
-			sudo sed -i "s|maintainer := .*$|maintainer := $NAME|" $CONF
+    if [ -n "$NAME" ] && [ -n "$MAIL" ]
+    then
+        log "Configuring kernel-package"
+        grep -q "$NAME" $CONF || \
+            sudo sed -i "s|maintainer := .*$|maintainer := $NAME|" $CONF
 
-		grep -q "$MAIL" $CONF || \
-			sudo sed -i "s|email := .*$|email := $MAIL|" $CONF
-	fi
+        grep -q "$MAIL" $CONF || \
+            sudo sed -i "s|email := .*$|email := $MAIL|" $CONF
+    fi
 }
 
 check_kernel() {
-	cd $(dirname $0)
-	if [ $PURGE ]
-	then
-		log "Purging $TARGET"
-		rm -rf $TARGET
-	fi
-	if [ ! -d $TARGET ]
-	then
-		if [ ! -e /usr/src/$TARGET.tar.xz ]
-		then
-			apt_install $TARGET
-		fi
-		log "Unpacking $TARGET.tar.xz"
-		tar -xf /usr/src/$TARGET.tar.xz
-	fi
+    cd $(dirname $0)
+    if [ $PURGE ]
+    then
+        log "Purging $TARGET"
+        rm -rf $TARGET
+    fi
+    if [ ! -d $TARGET ]
+    then
+        if [ ! -e /usr/src/$TARGET.tar.xz ]
+        then
+            apt_install $TARGET
+        fi
+        log "Unpacking $TARGET.tar.xz"
+        tar -xf /usr/src/$TARGET.tar.xz
+    fi
 }
 
 clean_kernel() {
-	cd $TARGET
-	if [ $CLEAN ]
-	then
-		log "Cleaning $TARGET"
-		make-kpkg clean
-	fi
+    cd $TARGET
+    if [ $CLEAN ]
+    then
+        log "Cleaning $TARGET"
+        make-kpkg clean
+    fi
 }
 
 config_kernel() {
-	log "Configuring $TARGET"
-	# start with current config; disable all modules
-	cat /boot/config-$(uname -r) | sed "s|=m|=n|" > .config
-	# re-enable wanted modules
-	for MODULE in $(cat ../modules.list)
-	do
-		sed -i "s|$MODULE=n|$MODULE=m|" .config
-	done
-	# enable additional options
-	for OPTION in $(cat ../options.list)
-	do
-		sed -i "s|# $OPTION is not set|$OPTION=y|" .config
-	done
-	# generate new config
-	make olddefconfig
+    log "Configuring $TARGET"
+    # start with current config; disable all modules
+    cat /boot/config-$(uname -r) | sed "s|=m|=n|" > .config
+    # re-enable wanted modules
+    for MODULE in $(cat ../modules.list)
+    do
+        sed -i "s|$MODULE=n|$MODULE=m|" .config
+    done
+    # enable additional options
+    for OPTION in $(cat ../options.list)
+    do
+        sed -i "s|# $OPTION is not set|$OPTION=y|" .config
+    done
+    # generate new config
+    make olddefconfig
 }
 
 build_kernel() {
-	log "Compiling $TARGET"
-	make-kpkg \
-		--append-to-version=-$VERSION \
-		--initrd \
-		--jobs=$(grep ^processor /proc/cpuinfo | wc -l) \
-		--revision=$REVISION.$HARDWARE \
-		--rootcmd=fakeroot \
-		kernel_headers \
-		kernel_image
+    log "Compiling $TARGET"
+    make-kpkg \
+        --append-to-version=-$VERSION \
+        --initrd \
+        --jobs=$(grep ^processor /proc/cpuinfo | wc -l) \
+        --revision=$REVISION.$HARDWARE \
+        --rootcmd=fakeroot \
+        kernel_headers \
+        kernel_image
 
-	log "Done!"
-	ls -lh ../linux-*.deb
+    log "Done!"
+    ls -lh ../linux-*.deb
 }
 
 # setup
@@ -148,7 +148,7 @@ check_kernel
 
 # compile
 time (
-	clean_kernel
-	config_kernel
-	build_kernel
+    clean_kernel
+    config_kernel
+    build_kernel
 )
