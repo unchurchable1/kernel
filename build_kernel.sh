@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REVISION="1.0"
+REVISION="1.1"
 HARDWARE="ASUS.R540S"
 VERSION="custom"
 
