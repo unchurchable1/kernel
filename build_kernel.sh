@@ -18,6 +18,7 @@ show_usage() {
     printf "Options:\n"
     printf "  -c      clean kernel source tree; runs 'make-kpkg clean'\n"
     printf "  -p      purge kernel source tree; runs 'rm -rf $TARGET'\n"
+    printf "  -i      install kernel packages when the build is done\n"
     printf "  -h      display this help and exit\n"
     exit
 }
@@ -29,7 +30,7 @@ wrong_usage() {
 }
 
 check_arguments() {
-    while getopts ":cph" OPT
+    while getopts ":cpih" OPT
     do
         case $OPT in
             c)
@@ -37,6 +38,9 @@ check_arguments() {
                 ;;
             p)
                 PURGE=true
+                ;;
+            i)
+                INSTALL=true
                 ;;
             h)
                 show_usage
@@ -116,9 +120,14 @@ config_kernel() {
         sed -i "s|$MODULE=n|$MODULE=m|" .config
     done
     # enable additional options
-    for OPTION in $(cat ../options.list)
+    for OPTION in $(cat ../enable.list)
     do
         sed -i "s|# $OPTION is not set|$OPTION=y|" .config
+    done
+    # disable additional options
+    for OPTION in $(cat ../disable.list)
+    do
+        sed -i "s|$OPTION=.*||" .config
     done
     # generate new config
     make olddefconfig
@@ -137,6 +146,13 @@ build_kernel() {
 
     log "Done!"
     ls -lh ../linux-*.deb
+
+    if [ $INSTALL ]
+    then
+        log "Installing $TARGET"
+        SUBLEVEL=$(grep ^SUBLEVEL Makefile | sed 's|^.*= ||')
+        sudo dpkg -i ../linux-*-"$LINUX_VERSION"."$SUBLEVEL"-"$VERSION"_"$REVISION"."$HARDWARE"_amd64.deb
+    fi
 }
 
 # setup
