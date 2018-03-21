@@ -151,7 +151,10 @@ build_kernel() {
     then
         log "Installing $TARGET"
         SUBLEVEL=$(grep ^SUBLEVEL Makefile | sed 's|^.*= ||')
-        sudo dpkg -i ../linux-*-"$LINUX_VERSION"."$SUBLEVEL"-"$VERSION"_"$REVISION"."$HARDWARE"_amd64.deb
+        for PKG in headers image
+        do
+            sudo dpkg -i ../linux-"$PKG"-"$LINUX_VERSION"."$SUBLEVEL"-"$VERSION"_"$REVISION"."$HARDWARE"_amd64.deb
+        done
     fi
 }
 
