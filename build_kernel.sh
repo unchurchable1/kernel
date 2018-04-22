@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REVISION="1.2"
+REVISION="1.3"
 HARDWARE="ASUS.R540S"
 VERSION="custom"
 
@@ -50,6 +50,16 @@ check_arguments() {
                 ;;
         esac
     done
+}
+
+check_config() {
+    uname -r | grep -q $VERSION
+    if [ $? == 0 ]
+    then
+        printf "Currently running a custom kernel\n"
+        printf "Switch to a stock kernel before compiling\n"
+        exit
+    fi
 }
 
 is_installed() {
@@ -160,6 +170,7 @@ build_kernel() {
 
 # setup
 check_arguments $@
+check_config
 check_dependencies
 config_mkkpkg
 check_kernel
