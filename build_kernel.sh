@@ -1,10 +1,10 @@
 #!/bin/bash
 
-REVISION="1.3"
+REVISION="1.4"
 HARDWARE="ASUS.R540S"
 VERSION="custom"
 
-LINUX_VERSION="4.15"
+LINUX_VERSION="4.16"
 TARGET="linux-source-$LINUX_VERSION"
 
 SELF=$(basename $0)
