@@ -1,10 +1,10 @@
 #!/bin/bash
 
-REVISION="1.4"
-HARDWARE="ASUS.R540S"
+REVISION="1.5"
+HARDWARE="ASUS.notebook"
 VERSION="custom"
 
-LINUX_VERSION="4.17"
+LINUX_VERSION="4.18"
 TARGET="linux-source-$LINUX_VERSION"
 
 SELF=$(basename $0)
@@ -73,8 +73,11 @@ apt_install() {
 }
 
 check_dependencies() {
-    is_installed fakeroot || apt_install fakeroot
-    is_installed make-kpkg || apt_install kernel-package
+    DEPS="bison fakeroot flex make-kpkg"
+    for DEP in "$DEPS"
+    do
+        is_installed "$DEP" || apt_install "$DEP"
+    done
 }
 
 config_mkkpkg() {
