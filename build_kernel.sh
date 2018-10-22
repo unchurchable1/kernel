@@ -73,11 +73,8 @@ apt_install() {
 }
 
 check_dependencies() {
-    DEPS="bison fakeroot flex make-kpkg"
-    for DEP in "$DEPS"
-    do
-        is_installed "$DEP" || apt_install "$DEP"
-    done
+    is_installed fakeroot || apt_install fakeroot
+    is_installed make-kpkg || apt_install kernel-package
 }
 
 config_mkkpkg() {
