@@ -130,15 +130,21 @@ config_kernel() {
         sed -i "s|$MODULE=n|$MODULE=m|" .config
     done
     # enable additional options
-    for OPTION in $(cat ../enable.list)
-    do
-        sed -i "s|# $OPTION is not set|$OPTION=y|" .config
-    done
+    if [ -e ../enable.list ]
+    then
+        for OPTION in $(cat ../enable.list)
+        do
+            sed -i "s|# $OPTION is not set|$OPTION=y|" .config
+        done
+    fi
     # disable additional options
-    for OPTION in $(cat ../disable.list)
-    do
-        sed -i "s|$OPTION=.*||" .config
-    done
+    if [ -e ../disable.list ]
+    then
+        for OPTION in $(cat ../disable.list)
+        do
+            sed -i "s|$OPTION=.*||" .config
+        done
+    fi
     # generate new config
     make olddefconfig
 }
