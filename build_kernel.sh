@@ -6,6 +6,7 @@ VERSION="custom"
 
 LINUX_VERSION="4.18"
 TARGET="linux-source-$LINUX_VERSION"
+CONFIG="config.amd64_none_amd64"
 
 SELF=$(basename $0)
 
@@ -50,16 +51,6 @@ check_arguments() {
                 ;;
         esac
     done
-}
-
-check_config() {
-    uname -r | grep -q $VERSION
-    if [ $? == 0 ]
-    then
-        printf "Currently running a custom kernel\n"
-        printf "Switch to a stock kernel before compiling\n"
-        exit
-    fi
 }
 
 is_installed() {
@@ -109,6 +100,10 @@ check_kernel() {
         log "Unpacking $TARGET.tar.xz"
         tar -xf /usr/src/$TARGET.tar.xz
     fi
+    if [ ! -e /usr/src/linux-config-$LINUX_VERSION/$CONFIG.xz ]
+    then
+        apt_install linux-config-$LINUX_VERSION
+    fi
 }
 
 clean_kernel() {
@@ -122,8 +117,8 @@ clean_kernel() {
 
 config_kernel() {
     log "Configuring $TARGET"
-    # start with current config; disable all modules
-    cat /boot/config-$(uname -r) | sed "s|=m|=n|" > .config
+    # start with generic config; disable all modules
+    xzcat /usr/src/linux-config-$LINUX_VERSION/$CONFIG.xz | sed "s|=m|=n|" > .config
     # re-enable wanted modules
     for MODULE in $(cat ../modules.list)
     do
@@ -176,7 +171,6 @@ build_kernel() {
 
 # setup
 check_arguments $@
-check_config
 check_dependencies
 config_mkkpkg
 check_kernel
