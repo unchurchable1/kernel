@@ -4,7 +4,7 @@ REVISION="1.5"
 HARDWARE="ASUS.notebook"
 VERSION="custom"
 
-LINUX_VERSION="4.18"
+LINUX_VERSION="4.19"
 TARGET="linux-source-$LINUX_VERSION"
 CONFIG="config.amd64_none_amd64"
 
